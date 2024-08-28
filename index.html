@@ -175,8 +175,14 @@
         }
 
         function renderFilteredGraph() {
+            // Filter nodes based on the user's input
             const filteredNodes = allNodes.filter(node => filterItems.includes(node.data.id) || filterItems.includes(node.data.label));
-            const filteredEdges = allEdges.filter(edge => filterItems.includes(edge.data.source) && filterItems.includes(edge.data.target));
+
+            // Collect the IDs of the filtered nodes
+            const filteredNodeIds = new Set(filteredNodes.map(node => node.data.id));
+
+            // Filter edges where both source and target nodes are part of the filtered set
+            const filteredEdges = allEdges.filter(edge => filteredNodeIds.has(edge.data.source) && filteredNodeIds.has(edge.data.target));
 
             window.cyFiltered = cytoscape({
                 container: document.getElementById('cyFiltered'),
