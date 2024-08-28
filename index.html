@@ -63,24 +63,23 @@
     <script>
         let allNodes = [];
         let filterItems = [];
+        let autocomplete;
 
         async function loadAndRenderGraph() {
             try {
-                // Fetch and parse the YAML file
                 const response = await fetch('zoo_short.yaml');
                 const yamlText = await response.text();
                 const yamlData = jsyaml.load(yamlText);
 
-                // Prepare Cytoscape.js elements
                 const nodes = [];
                 const edges = [];
                 const suggestions = [];
 
-                // Extract nodes and edges from YAML data
                 for (const [nodeId, nodeData] of Object.entries(yamlData.complexityclasses)) {
                     const nodeLabel = nodeData.longname;
                     nodes.push({ data: { id: nodeId, label: nodeLabel } });
-                    suggestions.push(nodeId, nodeLabel); // Add nodeId and label to suggestions
+                    suggestions.push(nodeId);  // For autocomplete
+                    suggestions.push(nodeLabel);  // For autocomplete
 
                     if (nodeData.subsystemof) {
                         nodeData.subsystemof.forEach(parentId => {
@@ -91,17 +90,18 @@
 
                 allNodes = nodes; // Store all nodes for filtering
 
-                // Initialize Awesomplete with suggestions
-                new Awesomplete(document.getElementById('filterInput'), {
-                    list: [...new Set(suggestions)] // Remove duplicates from suggestions
-                });
+                if (!autocomplete) {
+                    // Initialize Awesomplete only once
+                    autocomplete = new Awesomplete(document.getElementById('filterInput'), {
+                        list: [...new Set(suggestions)],
+                        autoFirst: true
+                    });
+                }
 
-                // Filter nodes based on filterItems list
                 const filteredNodes = filterItems.length
                     ? nodes.filter(node => filterItems.includes(node.data.id) || filterItems.includes(node.data.label))
                     : nodes;
 
-                // Initialize Cytoscape.js
                 window.cy = cytoscape({
                     container: document.getElementById('cy'),
                     elements: filteredNodes.concat(edges),
@@ -149,13 +149,13 @@
             if (value && !filterItems.includes(value)) {
                 filterItems.push(value);
                 updateFilterList();
-                input.value = ''; // Clear input
+                input.value = ''; // Clear input after adding
             }
         }
 
         function updateFilterList() {
             const list = document.getElementById('filterList');
-            list.innerHTML = ''; // Clear the list
+            list.innerHTML = '';
             filterItems.forEach((item, index) => {
                 const li = document.createElement('li');
                 li.textContent = item;
