@@ -36,7 +36,7 @@
                     nodes.push({ data: { id: nodeId, label: nodeData.longname } });
                     if (nodeData.subsystemof) {
                         nodeData.subsystemof.forEach(parentId => {
-                            edges.push({ data: { id: `${parentId}_${nodeId}`, source: parentId, target: nodeId } });
+                            edges.push({ data: { id: `${nodeId}_${parentId}`, source: nodeId, target: parentId } });
                         });
                     }
                 }
@@ -67,14 +67,12 @@
                             style: {
                                 'width': 2,
                                 'line-color': '#ccc',
-                                'target-arrow-shape': 'triangle',
-                                'target-arrow-color': '#ccc',
-                                'target-arrow-fill': 'filled', // ensures the arrow is filled
+                                'source-arrow-shape': 'triangle', // Arrowhead at the source (start) of the edge
+                                'source-arrow-color': '#ccc',
+                                'source-arrow-fill': 'filled', // Ensure the arrowhead is filled
                                 'arrow-scale': 1.5,
-                                'curve-style': 'bezier', // use bezier curve for smoother appearance
-                                'mid-target-arrow-shape': 'triangle',
-                                'mid-target-arrow-color': '#ccc',
-                                'mid-target-arrow-fill': 'filled'
+                                'curve-style': 'bezier', // Smooth curve for edge
+                                'target-arrow-shape': 'none' // No arrowhead at the target (end) of the edge
                             }
                         }
                     ]
