@@ -15,7 +15,7 @@
     </style>
 </head>
 <body>
-    <h1>Interactive DAG Visualization 2 - electric boogaloo</h1>
+    <h1>Interactive DAG Visualization</h1>
     <button onclick="loadAndRenderGraph()">Load and Render Graph</button>
     <div id="cy"></div>
 
@@ -23,60 +23,45 @@
         async function loadAndRenderGraph() {
             try {
                 // Fetch and parse the YAML file
-                const response = await fetch('dag.yaml');
+                const response = await fetch('zoo_short.yaml');
                 const yamlText = await response.text();
                 const yamlData = jsyaml.load(yamlText);
 
-                // Convert YAML data to Cytoscape.js elements format
-                const elements = [];
-                const nodes = {};
+                // Prepare Cytoscape.js elements
+                const nodes = [];
                 const edges = [];
-
-                // Create nodes and edges from YAML data
-                for (const [id, data] of Object.entries(yamlData.proofsystems)) {
-                    nodes[id] = { data: { id: id, label: data.longname || id } };
-                    
-                    if (data.subsystemof) {
-                        const subsystems = Array.isArray(data.subsystemof) ? data.subsystemof : [data.subsystemof];
-                        subsystems.forEach(parent => {
-                            edges.push({ data: { id: `${parent}_${id}`, source: parent, target: id } });
+                
+                // Extract nodes and edges from YAML data
+                for (const [nodeId, nodeData] of Object.entries(yamlData.complexityclasses)) {
+                    nodes.push({ data: { id: nodeId, label: nodeData.longname } });
+                    if (nodeData.subsystemof) {
+                        nodeData.subsystemof.forEach(parentId => {
+                            edges.push({ data: { id: `${parentId}_${nodeId}`, source: parentId, target: nodeId } });
                         });
                     }
                 }
 
-                // Add nodes and edges to the elements array
-                for (const node in nodes) {
-                    elements.push(nodes[node]);
-                }
-                elements.push(...edges);
-
                 // Initialize Cytoscape.js
                 cytoscape({
                     container: document.getElementById('cy'),
-                    elements: elements,
+                    elements: nodes.concat(edges),
                     layout: {
-                        name: 'breadthfirst',
-                        directed: true,
-                        padding: 10
+                        name: 'grid',
+                        rows: 1
                     },
                     style: [
                         {
                             selector: 'node',
                             style: {
                                 'background-color': '#666',
-                                'label': 'data(label)',
-                                'color': '#fff',
-                                'text-valign': 'center',
-                                'text-halign': 'center'
+                                'label': 'data(label)'
                             }
                         },
                         {
                             selector: 'edge',
                             style: {
                                 'width': 2,
-                                'line-color': '#ccc',
-                                'target-arrow-color': '#ccc',
-                                'target-arrow-shape': 'triangle'
+                                'line-color': '#ccc'
                             }
                         }
                     ]
