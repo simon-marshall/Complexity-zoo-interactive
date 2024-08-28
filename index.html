@@ -57,7 +57,9 @@
                                 'label': 'data(label)',
                                 'text-valign': 'center',
                                 'text-halign': 'center',
-                                'width': 'label'
+                                'width': 'label',
+                                'height': 'label',
+                                'padding': 10
                             }
                         },
                         {
@@ -67,7 +69,12 @@
                                 'line-color': '#ccc',
                                 'target-arrow-shape': 'triangle',
                                 'target-arrow-color': '#ccc',
-                                'arrow-scale': 1.5
+                                'target-arrow-fill': 'filled', // ensures the arrow is filled
+                                'arrow-scale': 1.5,
+                                'curve-style': 'bezier', // use bezier curve for smoother appearance
+                                'mid-target-arrow-shape': 'triangle',
+                                'mid-target-arrow-color': '#ccc',
+                                'mid-target-arrow-fill': 'filled'
                             }
                         }
                     ]
