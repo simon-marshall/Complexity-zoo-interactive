@@ -16,22 +16,53 @@
             margin-top: 20px;
         }
         #filterInput {
-            width: 100%;
+            width: 80%;
             padding: 10px;
             font-size: 16px;
             box-sizing: border-box;
             margin-bottom: 10px;
+        }
+        #addButton {
+            width: 18%;
+            padding: 10px;
+            font-size: 16px;
+            margin-left: 2%;
+        }
+        #filterList {
+            margin-bottom: 10px;
+            list-style-type: none;
+            padding-left: 0;
+        }
+        #filterList li {
+            padding: 5px;
+            background-color: #f0f0f0;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #filterList li button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 3px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <h1>Interactive DAG Visualization</h1>
     <input id="filterInput" class="awesomplete" type="text" placeholder="Type to filter nodes..." />
+    <button id="addButton" onclick="addItem()">Add</button>
+    <ul id="filterList"></ul>
     <button onclick="loadAndRenderGraph()">Load and Render Graph</button>
     <div id="cy"></div>
 
     <script>
         let allNodes = [];
+        let filterItems = [];
 
         async function loadAndRenderGraph() {
             try {
@@ -53,7 +84,6 @@
 
                     if (nodeData.subsystemof) {
                         nodeData.subsystemof.forEach(parentId => {
-                            // Create an edge from parentId to nodeId
                             edges.push({ data: { id: `${parentId}_${nodeId}`, source: parentId, target: nodeId } });
                         });
                     }
@@ -66,10 +96,15 @@
                     list: [...new Set(suggestions)] // Remove duplicates from suggestions
                 });
 
+                // Filter nodes based on filterItems list
+                const filteredNodes = filterItems.length
+                    ? nodes.filter(node => filterItems.includes(node.data.id) || filterItems.includes(node.data.label))
+                    : nodes;
+
                 // Initialize Cytoscape.js
                 window.cy = cytoscape({
                     container: document.getElementById('cy'),
-                    elements: nodes.concat(edges),
+                    elements: filteredNodes.concat(edges),
                     layout: {
                         name: 'grid',
                         rows: 1
@@ -102,31 +137,39 @@
                         }
                     ]
                 });
-
-                // Attach event listener for filtering
-                document.getElementById('filterInput').addEventListener('input', filterGraph);
-
             } catch (error) {
                 console.error(error);
                 document.getElementById('cy').innerHTML = '<p>Error loading or parsing YAML file.</p>';
             }
         }
 
-        function filterGraph() {
-            const query = document.getElementById('filterInput').value.toLowerCase();
-            if (query) {
-                const filteredNodes = allNodes.filter(node => 
-                    node.data.id.toLowerCase().includes(query) ||
-                    node.data.label.toLowerCase().includes(query)
-                );
-                window.cy.elements().remove();
-                window.cy.add(filteredNodes);
-                window.cy.layout({ name: 'grid', rows: 1 }).run();
-            } else {
-                window.cy.elements().remove();
-                window.cy.add(allNodes);
-                window.cy.layout({ name: 'grid', rows: 1 }).run();
+        function addItem() {
+            const input = document.getElementById('filterInput');
+            const value = input.value.trim();
+            if (value && !filterItems.includes(value)) {
+                filterItems.push(value);
+                updateFilterList();
+                input.value = ''; // Clear input
             }
+        }
+
+        function updateFilterList() {
+            const list = document.getElementById('filterList');
+            list.innerHTML = ''; // Clear the list
+            filterItems.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'Remove';
+                removeButton.onclick = () => removeItem(index);
+                li.appendChild(removeButton);
+                list.appendChild(li);
+            });
+        }
+
+        function removeItem(index) {
+            filterItems.splice(index, 1);
+            updateFilterList();
         }
     </script>
 </body>
