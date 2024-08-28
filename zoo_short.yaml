@@ -1,9 +1,59 @@
-# SPDX-License-Identifier: CC-BY-4.0+
+# Mandatory: longname
+# Optional: notes
+complexityclasses:
+  np:# SPDX-License-Identifier: CC-BY-4.0+
 
 # Mandatory: longname
 # Optional: notes
 complexityclasses:
+  am:
+    longname: "Arthur-Merlin"
+    subsystemof:
+      -ph
+
+  coam:
+    longname: "Compliment of Arthur-Merlin"
+    subsystemof:
+      -ph
+
+  bpp:
+    longname: "Bounded-Error Probabilistic Polynomial-Time"
+    subsystemof:
+      -ph
+      -am
+      -coam
+      -bpp
+
+  bqp:
+    longname: "Bounded-Error Quantum Polynomial-Time"
+    subsystemof:
+      - ph
+
   np:
+    longname: "Nondeterministic Polytime"
+    subsystemof:
+      - ph
+      - am
+
+  conp:
+    longname: "Compliment of Nondeterministic Polytime"
+    subsystemof:
+      - ph
+      - coam
+  
+  p:
+    longname: "Polytime"
+    subsystemof:
+      - ph
+      - np
+      - conp
+      - bpp
+      - coam
+      - am
+      - bqp
+  ph:
+    longname: "Plunomial Hierarchy"  
+
     longname: "Nondeterministic Polytime"
     subsystemof:
       - ph
