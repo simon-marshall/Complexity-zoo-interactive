@@ -15,56 +15,13 @@
             border: 1px solid #ccc;
             margin-top: 20px;
         }
-        #filterInput {
-            width: 80%;
-            padding: 10px;
-            font-size: 16px;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-        }
-        #addButton {
-            width: 18%;
-            padding: 10px;
-            font-size: 16px;
-            margin-left: 2%;
-        }
-        #filterList {
-            margin-bottom: 10px;
-            list-style-type: none;
-            padding-left: 0;
-        }
-        #filterList li {
-            padding: 5px;
-            background-color: #f0f0f0;
-            margin-bottom: 5px;
-            border-radius: 3px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        #filterList li button {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 5px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
     <h1>Interactive DAG Visualization</h1>
-    <input id="filterInput" class="awesomplete" type="text" placeholder="Type to filter nodes..." />
-    <button id="addButton" onclick="addItem()">Add</button>
-    <ul id="filterList"></ul>
-    <button onclick="loadAndRenderGraph()">Load and Render Graph</button>
     <div id="cy"></div>
 
     <script>
-        let allNodes = [];
-        let filterItems = [];
-        let autocomplete;
-
         async function loadAndRenderGraph() {
             try {
                 const response = await fetch('zoo_short.yaml');
@@ -73,13 +30,10 @@
 
                 const nodes = [];
                 const edges = [];
-                const suggestions = [];
 
                 for (const [nodeId, nodeData] of Object.entries(yamlData.complexityclasses)) {
                     const nodeLabel = nodeData.longname;
                     nodes.push({ data: { id: nodeId, label: nodeLabel } });
-                    suggestions.push(nodeId);  // For autocomplete
-                    suggestions.push(nodeLabel);  // For autocomplete
 
                     if (nodeData.subsystemof) {
                         nodeData.subsystemof.forEach(parentId => {
@@ -88,23 +42,9 @@
                     }
                 }
 
-                allNodes = nodes; // Store all nodes for filtering
-
-                if (!autocomplete) {
-                    // Initialize Awesomplete only once
-                    autocomplete = new Awesomplete(document.getElementById('filterInput'), {
-                        list: [...new Set(suggestions)],
-                        autoFirst: true
-                    });
-                }
-
-                const filteredNodes = filterItems.length
-                    ? nodes.filter(node => filterItems.includes(node.data.id) || filterItems.includes(node.data.label))
-                    : nodes;
-
                 window.cy = cytoscape({
                     container: document.getElementById('cy'),
-                    elements: filteredNodes.concat(edges),
+                    elements: nodes.concat(edges),
                     layout: {
                         name: 'grid',
                         rows: 1
@@ -138,39 +78,13 @@
                     ]
                 });
             } catch (error) {
-                console.error(error);
-                document.getElementById('cy').innerHTML = '<p>Error loading or parsing YAML file.</p>';
+                console.error('Error loading or parsing YAML file:', error);
+                document.getElementById('cy').innerHTML = `<p>Error: ${error.message}</p>`;
             }
         }
 
-        function addItem() {
-            const input = document.getElementById('filterInput');
-            const value = input.value.trim();
-            if (value && !filterItems.includes(value)) {
-                filterItems.push(value);
-                updateFilterList();
-                input.value = ''; // Clear input after adding
-            }
-        }
-
-        function updateFilterList() {
-            const list = document.getElementById('filterList');
-            list.innerHTML = '';
-            filterItems.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.textContent = item;
-                const removeButton = document.createElement('button');
-                removeButton.textContent = 'Remove';
-                removeButton.onclick = () => removeItem(index);
-                li.appendChild(removeButton);
-                list.appendChild(li);
-            });
-        }
-
-        function removeItem(index) {
-            filterItems.splice(index, 1);
-            updateFilterList();
-        }
+        // Load the graph immediately when the page loads
+        window.onload = loadAndRenderGraph;
     </script>
 </body>
 </html>
