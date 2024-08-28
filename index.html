@@ -28,30 +28,55 @@
                 const yamlData = jsyaml.load(yamlText);
 
                 // Convert YAML data to Cytoscape.js elements format
-                const elements = yamlData.nodes.map(node => ({ data: { id: node.id } }))
-                    .concat(yamlData.edges.map(edge => ({ data: { id: edge.id, source: edge.source, target: edge.target } })));
+                const elements = [];
+                const nodes = {};
+                const edges = [];
+
+                // Create nodes and edges from YAML data
+                for (const [id, data] of Object.entries(yamlData.proofsystems)) {
+                    nodes[id] = { data: { id: id, label: data.longname || id } };
+                    
+                    if (data.subsystemof) {
+                        const subsystems = Array.isArray(data.subsystemof) ? data.subsystemof : [data.subsystemof];
+                        subsystems.forEach(parent => {
+                            edges.push({ data: { id: `${parent}_${id}`, source: parent, target: id } });
+                        });
+                    }
+                }
+
+                // Add nodes and edges to the elements array
+                for (const node in nodes) {
+                    elements.push(nodes[node]);
+                }
+                elements.push(...edges);
 
                 // Initialize Cytoscape.js
                 cytoscape({
                     container: document.getElementById('cy'),
                     elements: elements,
                     layout: {
-                        name: 'grid',
-                        rows: 1
+                        name: 'breadthfirst',
+                        directed: true,
+                        padding: 10
                     },
                     style: [
                         {
                             selector: 'node',
                             style: {
                                 'background-color': '#666',
-                                'label': 'data(id)'
+                                'label': 'data(label)',
+                                'color': '#fff',
+                                'text-valign': 'center',
+                                'text-halign': 'center'
                             }
                         },
                         {
                             selector: 'edge',
                             style: {
                                 'width': 2,
-                                'line-color': '#ccc'
+                                'line-color': '#ccc',
+                                'target-arrow-color': '#ccc',
+                                'target-arrow-shape': 'triangle'
                             }
                         }
                     ]
