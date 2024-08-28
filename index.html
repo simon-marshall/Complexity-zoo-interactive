@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cytoscape.js Minimal Example</title>
+    <title>Interactive DAG Visualization</title>
     <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.24.1/dist/cytoscape.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <style>
         #cy {
             width: 100%;
@@ -14,42 +15,52 @@
     </style>
 </head>
 <body>
-    <h1>Minimal Cytoscape.js Example</h1>
+    <h1>Interactive DAG Visualization</h1>
+    <button onclick="loadAndRenderGraph()">Load and Render Graph</button>
     <div id="cy"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var cy = cytoscape({
-                container: document.getElementById('cy'),
-                elements: [
-                    { data: { id: 'a' } },
-                    { data: { id: 'b' } },
-                    { data: { id: 'c' } },
-                    { data: { id: 'a_b', source: 'a', target: 'b' } },
-                    { data: { id: 'b_c', source: 'b', target: 'c' } }
-                ],
-                layout: {
-                    name: 'grid',
-                    rows: 1
-                },
-                style: [
-                    {
-                        selector: 'node',
-                        style: {
-                            'background-color': '#666',
-                            'label': 'data(id)'
-                        }
+        async function loadAndRenderGraph() {
+            try {
+                // Fetch and parse the YAML file
+                const response = await fetch('dag.yaml');
+                const yamlText = await response.text();
+                const yamlData = jsyaml.load(yamlText);
+
+                // Convert YAML data to Cytoscape.js elements format
+                const elements = yamlData.nodes.map(node => ({ data: { id: node.id } }))
+                    .concat(yamlData.edges.map(edge => ({ data: { id: edge.id, source: edge.source, target: edge.target } })));
+
+                // Initialize Cytoscape.js
+                cytoscape({
+                    container: document.getElementById('cy'),
+                    elements: elements,
+                    layout: {
+                        name: 'grid',
+                        rows: 1
                     },
-                    {
-                        selector: 'edge',
-                        style: {
-                            'width': 2,
-                            'line-color': '#ccc'
+                    style: [
+                        {
+                            selector: 'node',
+                            style: {
+                                'background-color': '#666',
+                                'label': 'data(id)'
+                            }
+                        },
+                        {
+                            selector: 'edge',
+                            style: {
+                                'width': 2,
+                                'line-color': '#ccc'
+                            }
                         }
-                    }
-                ]
-            });
-        });
+                    ]
+                });
+            } catch (error) {
+                console.error(error);
+                document.getElementById('cy').innerHTML = '<p>Error loading or parsing YAML file.</p>';
+            }
+        }
     </script>
 </body>
 </html>
