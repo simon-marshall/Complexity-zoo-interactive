@@ -1,11 +1,6 @@
 # Mandatory: longname
 # Optional: notes
 complexityclasses:
-  np:# SPDX-License-Identifier: CC-BY-4.0+
-
-# Mandatory: longname
-# Optional: notes
-complexityclasses:
   am:
     longname: "Arthur-Merlin"
     subsystemof:
