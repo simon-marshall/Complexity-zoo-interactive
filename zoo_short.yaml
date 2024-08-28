@@ -6,20 +6,20 @@ complexityclasses:
   am:
     longname: "Arthur-Merlin"
     subsystemof:
-      -ph
+      - ph
 
   coam:
     longname: "Compliment of Arthur-Merlin"
     subsystemof:
-      -ph
+      - ph
 
   bpp:
     longname: "Bounded-Error Probabilistic Polynomial-Time"
     subsystemof:
-      -ph
-      -am
-      -coam
-      -bpp
+      - ph
+      - am
+      - coam
+      - bpp
 
   bqp:
     longname: "Bounded-Error Quantum Polynomial-Time"
