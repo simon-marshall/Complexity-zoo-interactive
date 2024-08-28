@@ -7,10 +7,16 @@ complexityclasses:
     longname: "Nondeterministic Polytime"
     subsystemof:
       - ph
+
+  conp:
+    longname: "Co-Nondeterministic Polytime"
+    subsystemof:
+      - ph
   p:
     longname: "Polytime"
     subsystemof:
       - ph
       - np
+      - conp
   ph:
-    longname: "Plunomial Hierarchy"  
+    longname: "Plutoniumial Hierarchy"  
